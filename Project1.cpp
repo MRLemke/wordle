@@ -1,11 +1,17 @@
-/*******************************************************************************
-* Assignment: Project 1 -                                                      *
-* Author: Owen Donohue                                                         *
-* Date: Fall 2022                                                              *
-* File: Project1.cpp                                                           *
-*                                                                              *
-* Description: This file contains the                                          *
-*******************************************************************************/
+/***************************************************************************************
+* Assignment: Project 1 - Wordle Solver                                                *
+* Author: Owen Donohue                                                                 *
+* Date: Fall 2022                                                                      *
+* File: Project1.cpp                                                                   *
+*                                                                                      *
+* Description: This file contains the code that will find a 5 letter word              *
+*with no repeating letters. This code will import a dictionary and narrow it           *
+*down with the information gained by calling the check.cpp program.                    *
+*When the word in dictionary is found and is the same as the word in secret.txt        *
+*(without explicitly looking at secret.txt), the program will output "I win!",         *
+*along with the previously guessed words the program had used. If the word isn't found,*
+*there will be an output "I'll do better next time".                                   *
+***************************************************************************************/
 #include <iostream>
 #include "execute.h"
 #include <vector>
@@ -16,24 +22,9 @@
 #include <time.h>
 using namespace std;
 
-
-//This function will take a vector with letters and make them a word as a string.
-//This is mainly for outputing the guesses that the AI will make.
-string printOutWord(vector<char> letters) 
-
-{
-	string output = "";
-	for (int i = 0; i< letters.size(); i++)
-	
-	{
-		output+=letters[i];
-	}
-	
-	return output;
-}
-
-//This function is supposed to read the Dictionary51.txt contents into a vector of strings called dictionary51Vector. 
-//
+/********************************************************************************************************************
+*This function is supposed to read the Dictionary51.txt contents into a vector of strings called dictionary51Vector.* 
+********************************************************************************************************************/
 void createDictionaryVector(vector<string> & dictionary51Vector)
 
 {
@@ -54,11 +45,12 @@ void createDictionaryVector(vector<string> & dictionary51Vector)
 	}
 }
 
-
-//This function will return a string that will update what the AI knows so far. For example,
-//if the secret word is world and the AI guesses raise first, the wrongLetters vector will be 
-//updated with a,i,s,e and the possible letters will be updated with r. Nothing will happen to
-//correctAnswer since there is no correct letters in the right spot.
+/**********************************************************************************************
+*This function will return a string that will update what the AI knows so far. For example,   *
+*if the secret word is world and the AI guesses raise first, the wrongLetters vector will be  *
+*updated with a,i,s,e and the possible letters will be updated with r. Nothing will happen to *
+*correctAnswer since there is no correct letters in the right spot.                           *
+***********************************************************************************************/
 string checkForMatchingCharacters(string & currentGuess, string& correctAnswer, string & checkOutput, string& wrongLetters, string& possibleLetters) 
 {
 	for (int i = 0; i< 5; i++) {
@@ -80,12 +72,13 @@ string checkForMatchingCharacters(string & currentGuess, string& correctAnswer, 
 	
 	return correctAnswer;
 }
-
-//This function is going to sort the dictionary array with the knowledge the AI now knows.
-//This function will be repeated twice at the beginning with the two base guesses "raise" and "donut"
-//every iteration of the while loop in the main driver code. This function will be the main "logic" 
-//where the dictionary narrows down the list by process of elimination, so when the AI chooses random guesses,
-//there will be only a small number of choices to choose from.
+/**************************************************************************************************************
+*This function is going to sort the dictionary array with the knowledge the AI now knows.                     *
+*This function will be repeated twice at the beginning with the two base guesses "raise" and "donut"          *
+*every iteration of the while loop in the main driver code. This function will be the main "logic"            *
+*where the dictionary narrows down the list by process of elimination, so when the AI chooses random guesses, *
+*there will be only a small number of choices to choose from.                                                 *
+***************************************************************************************************************/
 void narrowDownOptions(vector <string> & dictionary51Vector, string possibleLetters, string wrongLetters, string correctAnswer) 
 {	
 	int count1 = 0;
@@ -125,8 +118,11 @@ void narrowDownOptions(vector <string> & dictionary51Vector, string possibleLett
 	}
 	
 }
-//This is the final function. It will select a random integer and that integer will be the index of the 
-//next guess after the first two static guesses.
+/*********************************************************************************************************
+*This is the final function. It will select a random integer and that integer will be the index of the   *
+*next guess after the first two static guesses. This function will return a string of the word that will *
+*be chosen for the next guess!                                                                           *
+**********************************************************************************************************/
 string randomGuess(vector <string>& dictionaryVector)
 {
 	srand(time(0));
@@ -134,15 +130,27 @@ string randomGuess(vector <string>& dictionaryVector)
 	int randomInt = rand()%maxNumber;
 	string currentGuess = dictionaryVector[randomInt];
 	srand(time(0));
+	if (dictionaryVector.size() < 3)
+		currentGuess = dictionaryVector[0];
 	return currentGuess;
 	
 }
 
-//Main driver code
+/**************************************************************************************************************************
+*This is the main function. In Main, two guesses will be selected at first, which are "raise" and "donut".                *
+*this initial guesses will never change, as they narrow down the choice for the next guess word dramatically.             *
+*There are 5 variables. String currentGuess stores the value of the next guess that the AI will make. The first           *
+*two values are "raise" and "donut". The next values that are assigned are selected from the randomGuess function.        *
+*The next variable stores the current knowledge of the correct guess, which is passed into the narrow down function.      *
+*The cmd variable stores the command for the ./check program. The count variable will increment in the while loop.        *
+*the vector dictionary51Vector will store the dictionary into a vector, and be narrowed down in the narrow down function. *
+*wrongLetters and possibleLetters store the impossible letters and possible letter the word could have. Finally,          *
+*the while loop will iterate until either the word is found or the 18 iterations have passed. (count startes at 3).       *
+***************************************************************************************************************************/
 int main ()
 
 {
-	
+	//Initialzing the variables.
 	string currentGuess = "raise";
 	string correctAnswer = ".....";
 	string cmd = "./check " + currentGuess;
@@ -162,7 +170,7 @@ int main ()
 		cout << "I win!" << endl;
 		return 0;
 	}
-		
+	//The 2nd static guess	
 	currentGuess = "donut";
 	cmd = "./check " + currentGuess;
 	checkOutput = execute(cmd);
@@ -186,8 +194,13 @@ int main ()
 		narrowDownOptions(dictionary51Vector, possibleLetters, wrongLetters, correctAnswer);
 		cout << count << " : " << currentGuess << " ==> " <<  checkOutput.substr(0,5) << endl;
 		count ++;
+		
+		
 	}
-
+		
+	
+	
+				
 	if (checkOutput.substr(0,5) == "+++++") {
 		cout <<"I win!" << endl;
 	}else {
